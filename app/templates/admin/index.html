@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Admin{% endblock %}
+
+{% block header %}
+  {{ super() }}
+  <nav class="page-nav">
+    <ul>
+      <li><a href="/admin/user">user</a></li>
+      <li><a href="/admin/search">search</a></li>
+      <li><a href="/admin/publish">publish</a></li>
+    </ul>
+  </nav>
+{% endblock %}

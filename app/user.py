@@ -1,10 +1,19 @@
 from app import cur
+from app import login_manager
+from app.db import get_account
+
+
+
+####################################
+# User class required by flask-login
+####################################
 
 class User():
     
-    def __init__(self, d):
-        self.user_id = d.user_id
-        self.username = d.username
+    def __init__(self, account):
+        self.id = account['user_id']
+        self.username = account['username']
+        self.is_admin = account['is_admin']
 
     @property
     def is_authenticated(self):
@@ -21,14 +30,8 @@ class User():
     # returns User id as a unicode string
     def get_id(self):
         return str(self.id)
-    
-    # My own custom method, not needed by flask-login
-    def get(self, user_id):
-        cur.execute("SELECT * FROM account WHERE id = (%s)", (user_id,))
-        return User(cur.fetchone())
-
 
 # returns User given unicode id
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User(get_account(user_id=user_id))

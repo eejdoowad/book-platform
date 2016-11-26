@@ -2,20 +2,15 @@
 
 {% from "_formhelpers.html" import render_field %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Login{% endblock %}
 
 {% block content %}
 <div class="row">
   <div class="four columns offset-by-four">
-    <form action="/register" method=post>
+    <form action="/login" method=post>
       {{ form.csrf_token }}
       {{ render_field(form.username) }}
-      {{ render_field(form.email) }}
       {{ render_field(form.password) }}
-      {{ render_field(form.confirm) }}
-      {{ render_field(form.first_name) }}
-      {{ render_field(form.last_name) }}
-      {{ render_field(form.admin) }}
       <input type="submit" value="Submit" class="button-primary u-full-width">
     </form>
   </div>

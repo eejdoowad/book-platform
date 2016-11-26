@@ -4,8 +4,15 @@
     <li><a href="/browse">browse</a></li>
     <li><a href="/search">search</a></li>
     <li><a href="/publish">publish</a></li>
-    <li><a href="/account">account</a></li>
+    {% if current_user.is_authenticated %}
+    {% if current_user.is_admin %}
+    <li><a href="/admin">admin</a></li>
+    {% endif %}
+    <li><a href="/profile" class="primary-color">{{ current_user.username }}</a></li>
+    <li><a href="/logout" class="error-color">logout</a></li>
+    {% else %}
     <li><a href="/login">login</a></li>
     <li><a href="/register">register</a></li>
+    {% endif %}
   </ul>
 </nav>

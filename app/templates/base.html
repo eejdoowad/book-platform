@@ -33,8 +33,11 @@
   <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
-    {% include 'header.html' %}
-    {% block content %}{% endblock %}
+    {% block header %}
+      {% include 'header.html' %}
+    {% endblock %}
+    {% block content %}
+    {% endblock %}
   </div>
 
 <!-- End Document

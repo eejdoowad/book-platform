@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from flask.ext.login import LoginManager
+from flask_login import LoginManager
 import psycopg2, psycopg2.extras
 
 app = Flask(__name__)

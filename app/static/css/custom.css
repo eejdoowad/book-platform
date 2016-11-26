@@ -6,11 +6,14 @@
 .page-nav > ul {
   list-style: none;
   display: inline-block;
+  margin-bottom: 0;
+  line-height: 1;
 }
 
 .page-nav > ul > li {
   display: relative;
   float: left;
+  margin-bottom: 0;
 }
 
 .page-nav > ul > li > a {
@@ -20,5 +23,36 @@
   margin-right: 35px;
   text-transform: uppercase;
   text-decoration: none;
+  color: black;
+}
+
+.errors {
+  color: red;
+}
+
+.primary-color {
+  color: #1EAEDB !important;
+}
+
+.error-color {
+  color: red !important;
+}
+
+.active-color {
+  color: mediumspringgreen !important;
+}
+
+dl.inline-dl dd {
+  display: inline;
+  margin: 0;
+}
+dl.inline-dl dd:after{
+  display: block;
+  content: '';
+}
+dl.inline-dl dt{
+  display: inline-block;
+  min-width: 150px;
+  font-weight: 600;
   color: black;
 }

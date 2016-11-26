@@ -1,0 +1,5 @@
+{
+  "python.pythonPath": "${workspaceRoot}/env/bin/python",
+  "python.linting.pylintEnabled": false,"editor.tabSize": 4,
+  "editor.insertSpaces": true
+}

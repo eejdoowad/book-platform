@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}404 Page not found{% endblock %}
+
+{% block content %}
+<div class="row">
+  <table class="u-full-width">
+    <thead>
+      <tr>
+        <th>user id</th>
+        <th>email</th>
+        <th>username</th>
+        <th>password</th>
+        <th>is admin</th>
+        <th>first name</th>
+        <th>last name</th>
+        <th>create time</th>
+        <th>website</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        <tr>
+          <td>{{ user.user_id }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.password }}</td>
+          <td>{{ user.is_admin }}</td>
+          <td>{{ user.first_name }}</td>
+          <td>{{ user.last_name }}</td>
+          <td>{{ user.create_time }}</td>
+          <td>{{ user.website }}</td>
+        </tr>
+      {% else %}
+        <tr>
+          <td>No users retrieved</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

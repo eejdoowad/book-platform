@@ -1,32 +1,15 @@
-# Import flask and template operators
 from flask import Flask, render_template
+from flask.ext.login import LoginManager
+import psycopg2, psycopg2.extras
 
-# Import SQLAlchemy
-from flask.ext.sqlalchemy import SQLAlchemy
-
-# Define the WSGI application object
 app = Flask(__name__)
-
-# Configurations
 app.config.from_object('config')
 
-# Define the database object which is imported
-# by modules and controllers
-db = SQLAlchemy(app)
+conn = psycopg2.connect("dbname=%s user=%s" % (app.config['DATABASE'], app.config['USER']))
+cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-# Sample HTTP error handling
-@app.errorhandler(404)
-def not_found(error):
-    return render_template('404.html'), 404
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
-# Import a module / component using its blueprint handler variable (mod_auth)
-from app.mod_auth.controllers import auth as auth_module
-
-# Register blueprint(s)
-app.register_blueprint(auth_module)
-# app.register_blueprint(xyz_module)
-# ..
-
-# Build the database:
-# This will create the database file using SQLAlchemy
-db.create_all()
+from app import views

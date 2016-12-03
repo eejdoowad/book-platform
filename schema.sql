@@ -77,7 +77,6 @@ CREATE TABLE chapter(
     status          VARCHAR(30) NOT NULL DEFAULT 'draft',
     content         text,
     PRIMARY KEY (chapter_id),
-    UNIQUE (book_id, chapter_id),
     FOREIGN KEY (book_id) REFERENCES book(book_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE

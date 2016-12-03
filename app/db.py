@@ -68,39 +68,46 @@ def get_account(**kwargs):
 # General Queries
 ####################################
 
-def browse_books_query(): return '''
-WITH genres AS (
-		SELECT b.book_id, array_agg(bg.genre) FILTER(WHERE genre IS NOT NULL) AS genres
-		FROM book b
-		LEFT JOIN book_genre bg ON b.book_id = bg.book_id
-		WHERE b.book_id = 1
-		GROUP BY b.book_id),
-	chapters AS (
-		SELECT b.book_id, count(*) AS chapter_count
-		FROM book b
-		LEFT JOIN chapter c ON b.book_id = c.book_id
-		GROUP BY b.book_id),
-	ratings AS (
-		SELECT b.book_id, AVG(r.rating) AS rating, COUNT(*) AS votes
-		FROM book b
-		LEFT JOIN book_rating r ON b.book_id = r.book_id
-		GROUP BY b.book_id)
-SELECT b.title, a.username, g.genres, c.chapter_count, r.rating, r.votes, b.create_time::date
-FROM book b
-LEFT JOIN account a ON b.author_id = a.user_id
-LEFT JOIN genres g ON b.book_id = g.book_id
-LEFT JOIN chapters c ON b.book_id = c.book_id
-LEFT JOIN ratings r ON b.book_id = r.book_id;'''
 
 
-
-def gen_browse_select(entity):
-    select, columns = None, None
+def gen_browse_query(entity, sort, order):
+    order = 'ASC' if order == 'increasing' else 'DESC'
     if entity == 'book':
-        columns = None
-        select = '''
-            SELECT
-            FROM book'''
+        sort = 'create_time' if sort == 'new' else 'votes'
+        query = cur.mogrify('''
+            WITH genres AS (
+                    SELECT b.book_id, array_agg(bg.genre) FILTER(WHERE genre IS NOT NULL) AS genres
+                    FROM book b
+                    LEFT JOIN book_genre bg ON b.book_id = bg.book_id
+                    GROUP BY b.book_id),
+                chapters AS (
+                    SELECT b.book_id, count(*) AS chapter_count-- array_agg(c.title) AS chapter_titles, array_agg(c.chapter_id) AS chapter_ids
+                    FROM book b
+                    LEFT JOIN chapter c ON b.book_id = c.book_id
+                    GROUP BY b.book_id),
+                ratings AS (
+                    SELECT b.book_id, AVG(r.rating) AS rating, COUNT(r.user_id) AS votes
+                    FROM book b
+                    LEFT JOIN book_rating r ON b.book_id = r.book_id
+                    GROUP BY b.book_id),
+                book_views AS (
+                    WITH chapter_views as (
+                        SELECT c.book_id, c.chapter_id, COUNT(v.user_id) AS chapter_views
+                        FROM chapter c
+                        LEFT JOIN chapter_view v ON c.chapter_id = v.chapter_id
+                        GROUP BY c.chapter_id)
+                    SELECT b.book_id, COALESCE(SUM(cv.chapter_views), 0) AS book_views
+                    FROM book b
+                    LEFT JOIN chapter_views cv ON b.book_id = cv.book_id
+                    GROUP BY b.book_id)
+            SELECT b.title, a.username AS author, g.genres, c.chapter_count AS chapters, v.book_views AS views, r.rating, r.votes, b.create_time::date
+            FROM book b
+            LEFT JOIN account a ON b.author_id = a.user_id
+            LEFT JOIN genres g ON b.book_id = g.book_id
+            LEFT JOIN chapters c ON b.book_id = c.book_id
+            LEFT JOIN ratings r ON b.book_id = r.book_id
+            LEFT JOIN book_views v ON b.book_id = v.book_id
+            ORDER BY %s %s''', (AsIs(sort), AsIs(order)))
     elif entity == 'chapter':
         select = '''
             SELECT
@@ -111,15 +118,12 @@ def gen_browse_select(entity):
             FROM account'''
     else:
         raise Exception('Invalid entity made it through browse query')
-    return {
-        "select": select,
-        "columns": columns
-    }
+    return query
 
 
 def get_browse_data(entity, sort, order):
     select_clause = ''
-    cur.execute(browse_books_query())  
+    cur.execute(gen_browse_query(entity, sort, order))  
     columns = [desc[0] for desc in cur.description]
     rows = cur.fetchall()
     return {

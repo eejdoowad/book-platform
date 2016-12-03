@@ -141,7 +141,7 @@ def view_chapter(book_id, chapter_id):
     book = get_book_plus(book_id)
     chapter = get_chapter(book_id, chapter_id)
     print(chapter)
-    return redirect(url_for('view_chapter', book_id=book_id, chapter_id=chapter_id))
+    return render_template('chapter/index.html', book=book, chapter=chapter)
 
 
 @app.route('/book/<int:book_id>/chapter/<int:chapter_id>/delete', methods=['GET', 'POST'])

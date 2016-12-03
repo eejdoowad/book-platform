@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% from "_formhelpers.html" import render_field %}
+
+{% block title %}Create Book{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="four columns offset-by-four">
+    <form action="{{ url_for('create_book')}}" method=post>
+      {{ form.csrf_token }}
+      {{ render_field(form.title) }}
+      {{ render_field(form.summary) }}
+      {{ render_field(form.genres, class="select-menu u-full-width") }}
+      <input type="submit" value="Submit" class="button-primary u-full-width">
+      <a class="button u-full-width" href="{{ url_for('publish_index') }}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

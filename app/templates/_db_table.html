@@ -1,0 +1,22 @@
+<table class="u-full-width">
+  <thead>
+    <tr>
+      {% for column in columns %}
+      <th>{{ column }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+      {% for row in rows %}
+        <tr>
+        {% for e in row %}
+          <td>{{ e }}</td>
+        {% endfor %}
+        </tr>
+      {% else %}
+        <tr>
+          <td>empty table</td>
+        </tr>
+      {% endfor %}
+  </tbody>
+</table>

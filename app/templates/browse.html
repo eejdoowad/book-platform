@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Browse{% endblock %}
+
+{% block content %}
+    <div class="row">
+      View
+      <a class="button {{'button-primary' if entity == 'book' else ''}}" href="{{ url_for('browse', entity='book', sort=sort, order=order)}}">Books</a>
+      <a class="button {{'button-primary' if entity == 'chapter' else ''}}" href="{{ url_for('browse', entity='chapter', sort=sort, order=order)}}">Chapters</a>
+      <a class="button {{'button-primary' if entity == 'author' else ''}}" href="{{ url_for('browse', entity='author', sort=sort, order=order)}}">Authors</a>
+    </div>
+    <div class="row">
+      Sort by
+      <a class="button {{'button-primary' if sort == 'popular' else ''}}" href="{{ url_for('browse', entity=entity, sort='popular', order=order)}}">Popular</a>
+      <a class="button {{'button-primary' if sort == 'new' else ''}}" href="{{ url_for('browse', entity=entity, sort='new', order=order)}}">New</a>
+    </div>
+    <div class="row">
+      Order
+      <a class="button {{'button-primary' if order == 'increasing' else ''}}" href="{{ url_for('browse', entity=entity, sort=sort, order='increasing')}}">Increasing</a>
+      <a class="button {{'button-primary' if order == 'decreasing' else ''}}" href="{{ url_for('browse', entity=entity, sort=sort, order='decreasing')}}">Decreasing</a>
+    </div>
+    <div class="row">
+      {% include '_db_table.html' %}
+    </div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Publish{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="six columns offset-by-three">
+    <a class="button button-primary u-full-width" href="{{ url_for('create_book') }}">Create New Book</a>
+    {% include 'publish/_published_books.html' %}
+  </div>
+</div>
+{% endblock %}

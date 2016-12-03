@@ -2,10 +2,9 @@ from app import app
 from flask import render_template, flash, redirect, session, url_for, request, g, jsonify, abort
 from flask_login import login_required, login_user, logout_user, current_user
 from sys import stderr
-from wtforms import Form, BooleanField, StringField, PasswordField, validators
-from app.forms import RegistrationForm, LoginForm
-from app.db import register_user, get_all_users, get_account
+from app.forms import RegistrationForm, LoginForm, CreateBookForm, EditBookForm, CreateChapterForm, EditChapterForm
 from app.user import User
+from app.db import register_user, get_all_users, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data
 
 
 
@@ -23,14 +22,170 @@ def profile():
     account = get_account(username=current_user.username)
     return render_template('profile.html', account=account)
 
+def valid_browse_params(entity, sort, order):
+    return (
+        entity in ['book', 'chapter', 'author'] and
+        sort in ['popular', 'new'] and
+        order in ['increasing', 'decreasing'])
+
+@app.route('/browse', methods=['GET'])
+@app.route('/browse/<entity>', methods=['GET'])
+@app.route('/browse/<entity>/<sort>/<order>', methods=['GET'])
+def browse(entity='book', sort='popular', order='increasing'):
+    if valid_browse_params(entity, sort, order):
+        return render_template('browse.html', entity=entity, sort=sort, order=order, **get_browse_data(entity, sort, order))
+    return redirect(url_for('browse'))
+
+
+
+####################################
+# Book Routes
+####################################
+
+@app.route('/book/<int:book_id>', methods=['GET'])
+def view_book(book_id):
+    book = get_book_plus(book_id)
+    chapters = get_chapters_by_book(book_id)
+    return render_template('book/index.html', book=book, chapters=chapters)
+
+def init_edit_book_form(form, book):
+    form = EditBookForm(form)
+    form.genres.choices = [(genre, genre) for genre in get_genres()]
+    if form.title.data == None:
+        form.title.data = book['title']
+    if form.summary.data == None:
+        form.summary.data = book['summary']
+    if form.genres.data == None:
+        form.genres.data = [genre for genre in book['genres'] if genre != None]
+    return form
+
+@app.route('/book/<int:book_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_book(book_id):
+    old_book = get_book_plus(book_id)
+    form = init_edit_book_form(request.form, old_book)
+    # form = EditBookForm(request.form)
+    # form.genres.choices = [(genre, genre) for genre in get_genres()]
+    # form.title.default = old_book['title']
+    print(form)
+    if request.method == 'POST' and form.validate():
+        summary = form.summary.data if form.summary.data else None
+        edit_book_with_genres(book_id, form.title.data, form.genres.data, summary, old_book['genres'])
+        flash('Book Created')
+        return redirect(url_for('view_book', book_id=book_id))
+    return render_template('book/edit.html', form=form, book_id=book_id)
+
+@app.route('/book/create', methods=['GET', 'POST'])
+@login_required
+def create_book():
+    form = CreateBookForm(request.form)
+    form.genres.choices = [(genre, genre) for genre in get_genres()]
+    if request.method == 'POST' and form.validate():
+        summary = form.summary.data if form.summary.data else None
+        book_id = add_book_with_genres(current_user.user_id, form.title.data, form.genres.data, summary)
+        flash('Book Created')
+        return redirect(url_for('view_book', book_id=book_id))
+    return render_template('book/create.html', form=form)
+
+@app.route('/book/<int:book_id>/delete', methods=['GET', 'POST'])
+@login_required
+def delete_book(book_id):
+    remove_book(book_id)
+    return redirect(url_for('publish_index'))
+
+
+
+####################################
+# Chapter Routes
+####################################
+
+@app.route('/book/<int:book_id>/chapter/create', methods=['GET', 'POST'])
+@login_required
+def create_chapter(book_id):
+    book = get_book_plus(book_id)
+    form = CreateChapterForm(request.form)
+    if request.method == 'POST' and form.validate():
+        content = form.content.data if form.content.data else None
+        status = 'published' if form.status.data else 'draft'
+        chapter_id = add_chapter(book_id, form.title.data, content, status)
+        # flash('Chapter Created')
+        return redirect(url_for('view_chapter', book_id=book_id, chapter_id=chapter_id))
+    return render_template('chapter/create.html', form=form, book=book)
+
+def init_edit_chapter_form(form, chapter):
+    form = EditChapterForm(form)
+    if form.title.data == None:
+        form.title.data = chapter['title']
+    if form.content.data == None:
+        form.content.data = chapter['content']
+    if form.status.data == None:
+        form.genres.data = chapter['status'] == 'published'
+    return form
+
+@app.route('/book/<int:book_id>/chapter/<int:chapter_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_chapter(book_id, chapter_id):
+    book = get_book_plus(book_id)
+    chapter = get_chapter(book_id, chapter_id)
+    form = init_edit_chapter_form(request.form, chapter)
+    if request.method == 'POST' and form.validate():
+        content = form.content.data if form.content.data else None
+        status = 'published' if form.status.data else 'draft'
+        edit_book_chapter(book_id, chapter_id, form.title.data, content, status)
+        # flash('Chapter Created')
+        return redirect(url_for('view_chapter', book_id=book_id, chapter_id=chapter_id))
+    return render_template('chapter/edit.html', form=form, book=book, chapter=chapter)
+
+@app.route('/book/<int:book_id>/chapter/<int:chapter_id>', methods=['GET'])
+def view_chapter(book_id, chapter_id):
+    book = get_book_plus(book_id)
+    chapter = get_chapter(book_id, chapter_id)
+    print(chapter)
+    return redirect(url_for('view_chapter', book_id=book_id, chapter_id=chapter_id))
+
+
+@app.route('/book/<int:book_id>/chapter/<int:chapter_id>/delete', methods=['GET', 'POST'])
+@login_required
+def delete_chapter(book_id, chapter_id):
+    remove_book_chapter(book_id, chapter_id)
+    return redirect(url_for('view_book', book_id=book_id, chapter_id=chapter_id))
+
+####################################
+# Admin Routes
+####################################
+
+# @app.context_processor
+# def inject_user():
+#     return dict(user=g.user)
+
 @app.route('/admin', methods=['GET'])
 def admin():
-    return render_template('admin/index.html')
+    tables = get_tables()
+    return render_template('admin/index.html', tables=tables)
 
-@app.route('/admin/user', methods=['GET'])
-def admin_user():
-    users = get_all_users()
-    return render_template('admin/user.html', users=users)
+@app.route('/admin/table', methods=['GET'])
+def table_index():
+    tables = get_tables()
+    return render_template('admin/table/index.html', tables=tables)
+
+@app.route('/admin/table/<table>', methods=['GET'])
+def table_page(table):
+    if table not in get_tables():
+        abort(404)
+
+    return render_template('admin/table/table.html', tables=get_tables(), **get_table_data(table))
+
+
+
+####################################
+# Publish Routes
+####################################
+
+@app.route('/publish', methods=['GET'])
+@login_required
+def publish_index():
+    books = get_books_with_genre_by_author(current_user.user_id)
+    return render_template('publish/index.html', books=books)
 
 
 
@@ -46,6 +201,7 @@ def login():
         login_user(user)
         flash('Logged in successfully.')
         next = request.args.get('next')
+        print(next)
         return redirect(next or url_for('index'))
 
     return render_template('auth/login.html', form=form)

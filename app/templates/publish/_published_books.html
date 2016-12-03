@@ -1,0 +1,27 @@
+{% if books %}
+<table class="u-full-width">
+    <thead>
+    <tr>
+        <th>title</th>
+        <th>created</th>
+        <th>genre</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for book in books %}
+        <tr>
+        <td><a href="{{ url_for('view_book', book_id=book.book_id)}}">{{ book.title }}</a></td>
+        <td>{{ book.create_time }}</td>
+        <td>
+            {% for genre in book.genres %}
+            {{ genre }}
+            {%- if not loop.last %}, {% endif %}
+            {% endfor %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+  No Published Books
+{% endif %}

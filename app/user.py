@@ -12,6 +12,7 @@ class User():
     
     def __init__(self, account):
         self.id = account['user_id']
+        self.user_id = self.id
         self.username = account['username']
         self.is_admin = account['is_admin']
 
@@ -34,4 +35,5 @@ class User():
 # returns User given unicode id
 @login_manager.user_loader
 def load_user(user_id):
-    return User(get_account(user_id=user_id))
+    account = get_account(user_id=user_id)
+    return None if account == None else User(account)

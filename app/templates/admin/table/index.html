@@ -1,0 +1,15 @@
+{% extends "admin/index.html" %}
+
+{% block header %}
+  {{ super() }}
+  <nav class="page-nav table-list">
+    <ul>
+      {% for table in tables %}
+      <li><a href="/admin/table/{{ table }}">{{ table }}</a></li>
+      {% endfor %}
+    </ul>
+  </nav>
+{% endblock %}
+
+{% block content %}
+{% endblock %}

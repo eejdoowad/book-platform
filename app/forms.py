@@ -1,7 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import Form, BooleanField, StringField, PasswordField, validators
+from wtforms import Form, BooleanField, StringField, PasswordField, SelectMultipleField, TextAreaField
 from wtforms.validators import InputRequired, Length, EqualTo, ValidationError
 from app.db import key_available, get_user
+from app import app
+
+####################################
+# Custom Validators
+####################################
 
 # My custom Validator for checking to see that a unique key in the database isn't already taken
 def KeyAvailable(table, column):
@@ -13,6 +18,16 @@ def KeyAvailable(table, column):
 def admin_check(form, field):
     if field.data != '' and field.data != app.config['ADMIN_SECRET']:
         raise ValidationError('Incorrect admin secret key')
+
+def authenticate_user(form, field):
+    user = get_user(form.username.data)
+    if user == None or user['password'] != form.password.data:
+        raise ValidationError('Invalid username or password')
+
+
+####################################
+# Authentication Forms
+####################################
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', [
@@ -30,13 +45,7 @@ class RegistrationForm(FlaskForm):
     confirm = PasswordField('Repeat Password')
     first_name = StringField('First Name', [Length(min=1)])
     last_name = StringField('Last Name', [Length(min=1)])
-    admin = StringField('Admin Secret', [admin_check])
-
-
-def authenticate_user(form, field):
-    user = get_user(form.username.data)
-    if user == None or user['password'] != form.password.data:
-        raise ValidationError('Invalid username or password')
+    admin = PasswordField('Admin Secret', [admin_check])
 
 class LoginForm(FlaskForm):
     username = StringField('Username')
@@ -44,10 +53,45 @@ class LoginForm(FlaskForm):
         authenticate_user
     ])
 
+####################################
+# Book Forms
+####################################
+
 class CreateBookForm(FlaskForm):
-    title = StringField('title', [
-        KeyAvailable('book', 'title')
+    title = StringField('Title', [
+        Length(min=1, max=30)
     ])
+    summary = TextAreaField('Summary')
+    # choices generated dynamically in view
+    genres = SelectMultipleField('Genre')
+
+class EditBookForm(FlaskForm):
+    title = StringField('Title', [
+        Length(min=1, max=30)
+    ])
+    summary = TextAreaField('Summary')
+    # choices generated dynamically in view
+    genres = SelectMultipleField('Genre')
+
+####################################
+# Chapter Forms
+####################################
+
+class CreateChapterForm(FlaskForm):
+    title = StringField('Chapter Title', [
+        Length(min=1, max=30)
+    ])
+    content = TextAreaField('Content')
+    status = BooleanField('Publish (if not selected saves as draft)')
+
+class EditChapterForm(FlaskForm):
+    title = StringField('Chapter Title', [
+        Length(min=1, max=30)
+    ])
+    content = TextAreaField('Content')
+    status = BooleanField('Publish (if not selected saves as draft)')
+
+
 
 class PublishForm(FlaskForm):
     title = StringField('Username')

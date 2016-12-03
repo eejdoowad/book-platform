@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% from "_formhelpers.html" import render_field %}
+
+{% block title %}Edit Book{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="four columns offset-by-four">
+    <form action="{{ url_for('edit_book', book_id=book_id)}}" method=post>
+      {{ form.csrf_token }}
+      {{ render_field(form.title) }}
+      {{ render_field(form.summary) }}
+      {{ render_field(form.genres, class="select-menu u-full-width") }}
+      <input type="submit" value="Submit" class="button-primary u-full-width">
+    </form>
+    <a class="button u-full-width" href="{{ url_for('view_book', book_id=book_id)}}">Cancel Edit</a>
+    <a class="button button-error u-full-width" href="{{ url_for('delete_chapter', book_id=book_id, chapter_id=chapter_id)}}">Delete Book</a>
+  </div>
+</div>
+{% endblock %}

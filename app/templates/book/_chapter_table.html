@@ -1,0 +1,26 @@
+<table class="u-full-width">
+  <thead>
+    <tr>
+      <th>Chapter</th>
+      <th>Title</th>
+      <th>Status</th>
+      <th>Created</th>
+      <th>Edit</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for chapter in chapters %}
+      <tr>
+        <td>{{chapter.number }}</td>
+        <td><a href="{{ url_for('view_chapter', book_id=book.book_id, chapter_id=chapter.chapter_id)}}">{{ chapter.title }}</a></td>
+        <td>{{ chapter.status }}</td>
+        <td>{{ chapter.create_time }}</td>
+        <td><a class="button" href="{{ url_for('edit_chapter', book_id=book.book_id, chapter_id=chapter.chapter_id)}}">Edit</a></td>
+      </tr>
+    {% else %}
+      <tr>
+        <td>No Chapters</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

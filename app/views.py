@@ -31,7 +31,7 @@ def valid_browse_params(entity, sort, order):
 @app.route('/browse', methods=['GET'])
 @app.route('/browse/<entity>', methods=['GET'])
 @app.route('/browse/<entity>/<sort>/<order>', methods=['GET'])
-def browse(entity='book', sort='popular', order='increasing'):
+def browse(entity='book', sort='popular', order='decreasing'):
     if valid_browse_params(entity, sort, order):
         return render_template('browse.html', entity=entity, sort=sort, order=order, **get_browse_data(entity, sort, order))
     return redirect(url_for('browse'))

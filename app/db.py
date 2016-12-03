@@ -73,7 +73,8 @@ def get_account(**kwargs):
 def gen_browse_query(entity, sort, order):
     order = 'ASC' if order == 'increasing' else 'DESC'
     if entity == 'book':
-        sort = 'create_time' if sort == 'new' else 'votes'
+        popularity = '(r.votes + v.book_views) * (COALESCE(r.rating, 0) + 1)'
+        sort = 'create_time' if sort == 'new' else popularity
         query = cur.mogrify('''
             WITH genres AS (
                     SELECT b.book_id, array_agg(bg.genre) FILTER(WHERE genre IS NOT NULL) AS genres
@@ -81,7 +82,7 @@ def gen_browse_query(entity, sort, order):
                     LEFT JOIN book_genre bg ON b.book_id = bg.book_id
                     GROUP BY b.book_id),
                 chapters AS (
-                    SELECT b.book_id, count(*) AS chapter_count-- array_agg(c.title) AS chapter_titles, array_agg(c.chapter_id) AS chapter_ids
+                    SELECT b.book_id, count(*) AS chapter_count
                     FROM book b
                     LEFT JOIN chapter c ON b.book_id = c.book_id
                     GROUP BY b.book_id),
@@ -100,18 +101,23 @@ def gen_browse_query(entity, sort, order):
                     FROM book b
                     LEFT JOIN chapter_views cv ON b.book_id = cv.book_id
                     GROUP BY b.book_id)
-            SELECT b.title, a.username AS author, g.genres, c.chapter_count AS chapters, v.book_views AS views, r.rating, r.votes, b.create_time::date
+            SELECT b.title, a.username AS author, g.genres, c.chapter_count AS chapters, v.book_views AS views, r.rating, r.votes, %s, b.create_time::date
             FROM book b
             LEFT JOIN account a ON b.author_id = a.user_id
             LEFT JOIN genres g ON b.book_id = g.book_id
             LEFT JOIN chapters c ON b.book_id = c.book_id
             LEFT JOIN ratings r ON b.book_id = r.book_id
             LEFT JOIN book_views v ON b.book_id = v.book_id
-            ORDER BY %s %s''', (AsIs(sort), AsIs(order)))
+            ORDER BY %s %s''', (AsIs(popularity + ' AS popularity'), AsIs(sort), AsIs(order)))
     elif entity == 'chapter':
-        select = '''
-            SELECT
-            FROM chapter'''
+        sort = 'c.create_time' if sort == 'new' else 'c.view_count'
+        query = cur.mogrify('''
+            SELECT c.title, b.title AS book,
+                row_number() over(PARTITION BY c.book_id ORDER BY chapter_id) AS chapter,
+                c.view_count, c.create_time
+            FROM chapter c
+            LEFT JOIN book b ON c.book_id = b.book_id
+            ORDER BY %s %s;''', (AsIs(sort), AsIs(order)))
     elif entity == 'author':
         select = '''
             SELECT

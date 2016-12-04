@@ -5,7 +5,7 @@ from sys import stderr
 from copy import copy
 from app.forms import RegistrationForm, LoginForm, CreateBookForm, EditBookForm, CreateChapterForm, EditChapterForm, CommentForm
 from app.user import User
-from app.db import register_user, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book, add_chapter_comment, get_comments_by_chapter, get_comments_plus_table, report_new_users, report_new_books, report_most_followers, report_most_popular_books, report_most_commented_chapters
+from app.db import register_user, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book, add_chapter_comment, get_comments_by_chapter, get_comments_plus_table, report_new_users, report_new_books, report_most_followers, report_most_popular_books, report_most_commented_chapters, update_chapter_views
 
 
 
@@ -161,7 +161,7 @@ def view_chapter(book_id, chapter_id):
     book = get_book_plus(book_id)
     chapter = get_chapter(book_id, chapter_id)
     comments = get_comments_by_chapter(chapter_id)
-    print(chapter)
+    update_chapter_views(chapter_id, current_user.user_id)
     return render_template('chapter/index.html', book=book, chapter=chapter, comments=comments)
 
 

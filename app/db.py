@@ -247,6 +247,12 @@ def get_books_with_genre_by_author(author_id):
 # Chapter Queries
 ####################################
 
+def update_chapter_views(chapter_id, user_id):
+    cur.execute('''
+        INSERT INTO chapter_view (chapter_id, user_id)
+        VALUES (2, 1);''', (chapter_id, user_id))
+    conn.commit()
+
 def add_chapter(book_id, title, content, status):
     '''Inserts chapter into given book and returns chapter_id'''
     cur.execute('''

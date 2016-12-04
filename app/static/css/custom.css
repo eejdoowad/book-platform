@@ -8,6 +8,33 @@
   display: table;
   clear: right; }
 
+
+.comment-container {
+  position: relative;
+  margin-top: 30px;
+  min-height: 80px;
+  border-color: #33C3F0;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+}
+
+.comment-comment {
+  margin: 10px;
+  margin-bottom: 30px;
+}
+
+.comment-meta {
+  position: absolute;
+  bottom: 0px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.comment-meta-item {
+  margin-right: 10px;
+}
+
 .button-error {
   background-color: red;
   color: white;

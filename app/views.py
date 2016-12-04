@@ -2,9 +2,9 @@ from app import app
 from flask import render_template, flash, redirect, session, url_for, request, g, jsonify, abort
 from flask_login import login_required, login_user, logout_user, current_user
 from sys import stderr
-from app.forms import RegistrationForm, LoginForm, CreateBookForm, EditBookForm, CreateChapterForm, EditChapterForm
+from app.forms import RegistrationForm, LoginForm, CreateBookForm, EditBookForm, CreateChapterForm, EditChapterForm, CommentForm
 from app.user import User
-from app.db import register_user, get_all_users, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data
+from app.db import register_user, get_all_users, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book
 
 
 
@@ -46,7 +46,8 @@ def browse(entity='book', sort='popular', order='decreasing'):
 def view_book(book_id):
     book = get_book_plus(book_id)
     chapters = get_chapters_by_book(book_id)
-    return render_template('book/index.html', book=book, chapters=chapters)
+    comments = get_comments_by_book(book_id)
+    return render_template('book/index.html', book=book, chapters=chapters, comments=comments)
 
 def init_edit_book_form(form, book):
     form = EditBookForm(form)
@@ -149,6 +150,31 @@ def view_chapter(book_id, chapter_id):
 def delete_chapter(book_id, chapter_id):
     remove_book_chapter(book_id, chapter_id)
     return redirect(url_for('view_book', book_id=book_id, chapter_id=chapter_id))
+
+
+
+####################################
+# Comment Routes
+####################################
+
+def init_edit_comment_form(form, comment):
+    form = CommentForm(form)
+    if form.content.data == None:
+        form.content.data = comment['content']
+    return form
+
+@app.route('/book/<int:book_id>/comment/create', methods=['GET', 'POST'])
+@login_required
+def create_book_comment(book_id):
+    book = get_book_plus(book_id)
+    form = CommentForm(request.form)
+    if request.method == 'POST' and form.validate():
+        comment_id = add_book_comment(book_id, form.comment.data, current_user.user_id)
+        # flash('Chapter Created')
+        return redirect(url_for('view_book', book_id=book_id))
+    return render_template('comment/create.html', form=form, book=book)
+
+
 
 ####################################
 # Admin Routes

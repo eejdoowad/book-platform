@@ -73,6 +73,8 @@ class EditBookForm(FlaskForm):
     # choices generated dynamically in view
     genres = SelectMultipleField('Genre')
 
+
+
 ####################################
 # Chapter Forms
 ####################################
@@ -93,8 +95,11 @@ class EditChapterForm(FlaskForm):
 
 
 
-class PublishForm(FlaskForm):
-    title = StringField('Username')
-    password = PasswordField('New Password', [
-        authenticate_user
+####################################
+# Comment Forms
+####################################
+
+class CommentForm(FlaskForm):
+    comment = TextAreaField('Comment', [
+        Length(min=1)
     ])

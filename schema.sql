@@ -82,16 +82,6 @@ CREATE TABLE chapter(
         ON UPDATE CASCADE
 );
 
-
-DROP TABLE IF EXISTS comment;
-CREATE TABLE comment(
-	comment_id      SERIAL,
-	content         TEXT NOT NULL,
-	create_time     TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
-	update_time     TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
-	PRIMARY KEY (comment_id)
-);
-
 DROP TABLE IF EXISTS follow;
 CREATE TABLE follow(
 	follower_id     SERIAL,
@@ -172,19 +162,28 @@ CREATE TABLE book_save(
         ON UPDATE CASCADE
 );
 
+DROP TABLE IF EXISTS comment;
+CREATE TABLE comment(
+	comment_id      SERIAL,
+        user_id         SERIAL NOT NULL,
+	content         TEXT NOT NULL,
+	create_time     TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+	update_time     TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+	PRIMARY KEY (comment_id),
+        FOREIGN KEY (user_id) REFERENCES account(user_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
 DROP TABLE IF EXISTS book_comment;
 CREATE TABLE book_comment(
 	comment_id SERIAL,
 	book_id SERIAL NOT NULL,
-	user_id SERIAL NOT NULL,
 	PRIMARY KEY (comment_id),
 	FOREIGN KEY (comment_id) REFERENCES comment(comment_id)
 		ON DELETE CASCADE
 		ON UPDATE CASCADE,
 	FOREIGN KEY (book_id) REFERENCES book(book_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-	FOREIGN KEY (user_id) REFERENCES account(user_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
@@ -194,15 +193,11 @@ DROP TABLE IF EXISTS chapter_comment;
 CREATE TABLE chapter_comment(
 	comment_id SERIAL,
 	chapter_id SERIAL NOT NULL,
-	user_id SERIAL NOT NULL,
 	PRIMARY KEY (comment_id),
 	FOREIGN KEY (comment_id) REFERENCES comment(comment_id)
 		ON DELETE CASCADE
 		ON UPDATE CASCADE,
 	FOREIGN KEY (chapter_id) REFERENCES chapter(chapter_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-	FOREIGN KEY (user_id) REFERENCES account(user_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );

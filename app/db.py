@@ -119,9 +119,23 @@ def gen_browse_query(entity, sort, order):
             LEFT JOIN book b ON c.book_id = b.book_id
             ORDER BY %s %s;''', (AsIs(sort), AsIs(order)))
     elif entity == 'author':
-        select = '''
-            SELECT
-            FROM account'''
+        sort = 'a.create_time' if sort == 'new' else 'follow_count.follow_count'
+        query = cur.mogrify('''
+            WITH user_book_count AS (
+                SELECT a.user_id, COUNT(book_id) AS count
+                FROM account a
+                LEFT JOIN book b ON a.user_id = b.author_id
+                GROUP BY a.user_id),
+            follow_count AS (
+                SELECT a.user_id, COUNT(f.follower_id) AS follow_count
+                FROM account a
+                LEFT JOIN follow f ON a.user_id = f.followee_id
+                GROUP BY a.user_id)
+            SELECT username, first_name, last_name, create_time AS joined, website, follow_count.follow_count AS followers, user_book_count.count AS books
+            FROM account a
+            LEFT JOIN user_book_count ON a.user_id = user_book_count.user_id
+            LEFT JOIN follow_count ON a.user_id = follow_count.user_id
+            ORDER BY %s %s;''', (AsIs(sort), AsIs(order)))
     else:
         raise Exception('Invalid entity made it through browse query')
     return query
@@ -293,6 +307,35 @@ def remove_book_chapter(book_id, chapter_id):
         DELETE FROM chapter
         WHERE book_id = %s AND chapter_id = %s''',
         (book_id, chapter_id))
+
+
+
+####################################
+# Comment Queries
+####################################
+
+def add_book_comment(book_id, comment, user_id):
+    cur.execute('''
+        INSERT INTO comment (content, user_id)
+        VALUES (%s, %s)
+        RETURNING comment_id;''',
+        (comment, user_id))
+    comment_id = cur.fetchone()[0]
+    cur.execute('''
+        INSERT INTO book_comment (comment_id, book_id)
+        VALUES (%s, %s)''',
+        (comment_id, book_id))
+    conn.commit()
+    return comment_id
+
+
+def get_comments_by_book(book_id):
+    cur.execute('''
+        SELECT comment.create_time, comment.content, a.username
+        FROM book_comment NATURAL JOIN comment
+        LEFT JOIN account a ON comment.user_id = a.user_id
+        WHERE book_id = %s;''', (book_id,))
+    return cur.fetchall()
 
 ####################################
 # Admin Table View Queries

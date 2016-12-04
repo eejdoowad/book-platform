@@ -1,0 +1,18 @@
+<div id="comment-container u-full-width">
+{% for comment in comments %}
+    <div class="comment-container">
+    <div class="comment-comment">
+        {{ comment.content }}
+    </div>
+    <div class="comment-meta u-full-width">
+        <div class="comment-meta-item u-pull-right">
+        {{ comment.create_time}}
+        </div>
+        <div class="comment-meta-item u-pull-left">
+        {{ comment.username}}
+        </div>
+    </div>
+    </div>
+{% else %}
+    No comments
+{% endfor %}

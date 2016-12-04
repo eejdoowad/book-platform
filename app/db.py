@@ -146,6 +146,23 @@ def get_browse_data(entity, sort, order):
 # Book Queries
 ####################################
 
+def add_rating(book_id, user_id, rating):
+    cur.execute('''
+        INSERT INTO book_rating (book_id, user_id, rating)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (book_id, user_id) DO UPDATE
+        SET rating = %s;''', (book_id, user_id, rating, rating))
+    conn.commit()
+
+def get_rating(book_id, user_id):
+    cur.execute('''
+        SELECT rating
+        FROM book_rating
+        WHERE book_id = %s AND user_id = %s;''', (book_id, user_id))
+    row = cur.fetchone()
+    if row: return row[0]
+    return None
+
 def get_genres():
     cur.execute(''' SELECT * FROM genre ORDER BY genre ASC;''')
     genres = [e[0] for e in cur.fetchall()]

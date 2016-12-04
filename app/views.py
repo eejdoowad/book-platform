@@ -5,7 +5,7 @@ from sys import stderr
 from copy import copy
 from app.forms import RegistrationForm, LoginForm, CreateBookForm, EditBookForm, CreateChapterForm, EditChapterForm, CommentForm
 from app.user import User
-from app.db import register_user, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book, add_chapter_comment, get_comments_by_chapter, get_comments_plus_table, report_new_users, report_new_books, report_most_followers, report_most_popular_books, report_most_commented_chapters, update_chapter_views
+from app.db import register_user, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book, add_chapter_comment, get_comments_by_chapter, get_comments_plus_table, report_new_users, report_new_books, report_most_followers, report_most_popular_books, report_most_commented_chapters, update_chapter_views, add_rating, get_rating
 
 
 
@@ -61,12 +61,24 @@ def browse(entity='book', sort='popular', order='decreasing'):
 # Book Routes
 ####################################
 
+@app.route('/book/<int:book_id>/rate', methods=['GET', 'POST'])
+def rate_book(book_id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    print(request.form['rating'])
+    add_rating(book_id, current_user.user_id, int(request.form['rating']))
+    return redirect(url_for('view_book', book_id=book_id))
+
 @app.route('/book/<int:book_id>', methods=['GET'])
 def view_book(book_id):
     book = get_book_plus(book_id)
     chapters = get_chapters_by_book(book_id)
     comments = get_comments_by_book(book_id)
-    return render_template('book/index.html', book=book, chapters=chapters, comments=comments)
+    rating = 0
+    if current_user.is_authenticated:
+        rating = int(get_rating(book_id, current_user.user_id) or 0)
+    print(rating)
+    return render_template('book/index.html', book=book, chapters=chapters, comments=comments, rating=rating)
 
 def init_edit_book_form(form, book):
     form = EditBookForm(form)

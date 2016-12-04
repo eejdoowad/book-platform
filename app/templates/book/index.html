@@ -25,6 +25,25 @@
       <p>{{ book.summary }}</p>
     </div>
     <div>
+      <h2>Rate</h2>
+      <form class="row" action="{{ url_for('rate_book', book_id=book.book_id)}}" method=post>
+        <select name="rating" class="six columns">
+          <option value="0" {{ rating==0 and 'selected' }}>0</option>
+          <option value="1" {{ rating==1 and 'selected' }}>1</option>
+          <option value="2" {{ rating==2 and 'selected' }}>2</option>
+          <option value="3" {{ rating==3 and 'selected' }}>3</option>
+          <option value="4" {{ rating==4 and 'selected' }}>4</option>
+          <option value="5" {{ rating==5 and 'selected' }}>5</option>
+          <option value="6" {{ rating==6 and 'selected' }}>6</option>
+          <option value="7" {{ rating==7 and 'selected' }}>7</option>
+          <option value="8" {{ rating==8 and 'selected' }}>8</option>
+          <option value="9" {{ rating==9 and 'selected' }}>9</option>
+          <option value="10" {{ rating==10 and 'selected' }}>10</option>
+        </select>
+        <input type="submit" value="Submit" class="button-primary six columns">
+      </form>
+    </div>
+    <div>
       <a class="button button-primary u-pull-right" href="{{ url_for('create_book_comment', book_id=book.book_id)}}">Add Comment</a>
       <h2>Comments</h2>
         {% include 'comment/_comments.html' %}

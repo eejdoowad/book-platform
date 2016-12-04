@@ -337,6 +337,29 @@ def get_comments_by_book(book_id):
         WHERE book_id = %s;''', (book_id,))
     return cur.fetchall()
 
+def add_chapter_comment(chapter_id, comment, user_id):
+    cur.execute('''
+        INSERT INTO comment (content, user_id)
+        VALUES (%s, %s)
+        RETURNING comment_id;''',
+        (comment, user_id))
+    comment_id = cur.fetchone()[0]
+    cur.execute('''
+        INSERT INTO chapter_comment (comment_id, chapter_id)
+        VALUES (%s, %s)''',
+        (comment_id, chapter_id))
+    conn.commit()
+    return comment_id
+
+
+def get_comments_by_chapter(chapter_id):
+    cur.execute('''
+        SELECT comment.create_time, comment.content, a.username
+        FROM chapter_comment NATURAL JOIN comment
+        LEFT JOIN account a ON comment.user_id = a.user_id
+        WHERE chapter_id = %s;''', (chapter_id,))
+    return cur.fetchall()
+
 ####################################
 # Admin Table View Queries
 ####################################

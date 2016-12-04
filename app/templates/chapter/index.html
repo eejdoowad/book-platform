@@ -7,13 +7,19 @@
 {% block content %}
 <div class="row">
   <div class="six columns offset-by-three">
-    <h1>{{ book.title }}</h1>
-    <h2>By {{book.username}}</h2>
-    <h2>Chapter {{ chapter.number }}. {{ chapter.title }}</h2>
-    <h3>Published {{ chapter.create_time }}</h3>
-    <a class="button u-full-width" href="{{ url_for('view_book', book_id=book.book_id) }}">Return to Book Index</a>
-    <p><pre style="white-space: pre-wrap">{{ chapter.content }}</pre></p>
-    <a class="button u-full-width" href="{{ url_for('view_book', book_id=book.book_id) }}">Return to Book Index</a>
+    <div>
+        <a class="button u-pull-right" href="{{ url_for('view_book', book_id=book.book_id) }}">Return to Book Index</a>
+        <h1>{{ book.title }}</h1>
+        <h2>By {{book.username}}</h2>
+        <h2>Chapter {{ chapter.number }}. {{ chapter.title }}</h2>
+        <h3>Published {{ chapter.create_time }}</h3>
+        <p><pre style="white-space: pre-wrap">{{ chapter.content }}</pre></p>
+    </div>
+    <div>
+      <a class="button button-primary u-pull-right" href="{{ url_for('create_chapter_comment', book_id=book.book_id, chapter_id=chapter.chapter_id)}}">Add Comment</a>
+      <h2>Comments</h2>
+       {% include 'comment/_comments.html' %}
+    </div>
   </div>
 </div>
 {% endblock %}

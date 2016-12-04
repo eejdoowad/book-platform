@@ -4,7 +4,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from sys import stderr
 from app.forms import RegistrationForm, LoginForm, CreateBookForm, EditBookForm, CreateChapterForm, EditChapterForm, CommentForm
 from app.user import User
-from app.db import register_user, get_all_users, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book
+from app.db import register_user, get_all_users, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book, add_chapter_comment, get_comments_by_chapter
 
 
 
@@ -20,6 +20,15 @@ def index():
 @login_required
 def profile():
     account = get_account(username=current_user.username)
+    return render_template('profile.html', account=account)
+
+@app.route('/user/<username>', methods=['GET', 'POST'])
+@login_required
+def view_user(username):
+    account = get_account(username=username)
+    print(account)
+    if account == None:
+        abort(404)
     return render_template('profile.html', account=account)
 
 def valid_browse_params(entity, sort, order):
@@ -141,8 +150,9 @@ def edit_chapter(book_id, chapter_id):
 def view_chapter(book_id, chapter_id):
     book = get_book_plus(book_id)
     chapter = get_chapter(book_id, chapter_id)
+    comments = get_comments_by_chapter(chapter_id)
     print(chapter)
-    return render_template('chapter/index.html', book=book, chapter=chapter)
+    return render_template('chapter/index.html', book=book, chapter=chapter, comments=comments)
 
 
 @app.route('/book/<int:book_id>/chapter/<int:chapter_id>/delete', methods=['GET', 'POST'])
@@ -174,6 +184,17 @@ def create_book_comment(book_id):
         return redirect(url_for('view_book', book_id=book_id))
     return render_template('comment/create.html', form=form, book=book)
 
+@app.route('/book/<int:book_id>/chapter/<int:chapter_id>/comment/create', methods=['GET', 'POST'])
+@login_required
+def create_chapter_comment(book_id, chapter_id):
+    book = get_book_plus(book_id)
+    chapter = get_chapter(book_id, chapter_id)
+    form = CommentForm(request.form)
+    if request.method == 'POST' and form.validate():
+        comment_id = add_chapter_comment(chapter_id, form.comment.data, current_user.user_id)
+        # flash('Chapter Created')
+        return redirect(url_for('view_chapter', book_id=book_id, chapter_id=chapter_id))
+    return render_template('comment/create_chapter_comment.html', form=form, book=book, chapter=chapter)
 
 
 ####################################

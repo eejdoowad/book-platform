@@ -2,16 +2,16 @@
 
 {% from "_formhelpers.html" import render_field %}
 
-{% block title %}Create Book Comment{% endblock %}
+{% block title %}Create Chapter Comment{% endblock %}
 
 {% block content %}
 <div class="row">
   <div class="four columns offset-by-four">
-    <form action="{{ url_for('create_book_comment', book_id=book.book_id)}}" method=post>
+    <form action="{{ url_for('create_chapter_comment', book_id=book.book_id, chapter_id=chapter.chapter_id)}}" method=post>
       {{ form.csrf_token }}
       {{ render_field(form.comment) }}
       <input type="submit" value="Submit" class="button-primary u-full-width">
-      <a class="button u-full-width" href="{{ url_for('view_book', book_id=book.book_id) }}">Cancel</a>
+      <a class="button u-full-width" href="{{ url_for('view_chapter', book_id=book.book_id, chapter_id=chapter.chapter_id) }}">Cancel</a>
     </form>
   </div>
 </div>

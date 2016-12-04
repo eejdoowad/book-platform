@@ -142,7 +142,6 @@ def gen_browse_query(entity, sort, order):
 
 
 def get_browse_data(entity, sort, order):
-    select_clause = ''
     cur.execute(gen_browse_query(entity, sort, order))  
     columns = [desc[0] for desc in cur.description]
     rows = cur.fetchall()
@@ -359,6 +358,28 @@ def get_comments_by_chapter(chapter_id):
         LEFT JOIN account a ON comment.user_id = a.user_id
         WHERE chapter_id = %s;''', (chapter_id,))
     return cur.fetchall()
+
+def get_comments_plus():
+    cur.execute('''
+    SELECT c.create_time, c.content, a.username, 
+	    CASE WHEN bc.book_id IS NULL THEN FALSE ELSE TRUE END is_book_comment, COALESCE(b.title, chapter.title) AS title, COALESCE(bc.book_id, cc.chapter_id) AS fk_id
+    FROM comment c
+    LEFT JOIN account a ON c.user_id = a.user_id
+    LEFT JOIN chapter_comment cc ON c.comment_id = cc.comment_id
+    LEFT JOIN book_comment bc ON c.comment_id = bc.comment_id
+    LEFT JOIN book b ON bc.book_id = b.book_id
+    LEFT JOIN chapter ON cc.chapter_id = chapter.chapter_id
+    ORDER BY c.create_time DESC;''')
+    return cur.fetchall()
+
+def get_comments_plus_table():
+    rows = get_comments_plus()
+    columns = [desc[0] for desc in cur.description]
+    return {
+        "table": 'comments',
+        "columns": columns,
+        "rows": rows
+    }
 
 ####################################
 # Admin Table View Queries

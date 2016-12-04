@@ -35,6 +35,18 @@
   margin-right: 10px;
 }
 
+.item-container {
+  position: relative;
+  margin-top: 30px;
+  min-height: 280px;
+  border-color: #33C3F0;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  overflow-x: scroll;
+  padding: 10px;
+}
+
 .button-error {
   background-color: red;
   color: white;
@@ -100,8 +112,11 @@ h6 { font-size: 1.0rem; line-height: 1.6;  letter-spacing: 0; }
   color: mediumspringgreen !important;
 }
 
+.inline-dl {
+  overflow-x: scroll;
+}
 dl.inline-dl dd {
-  display: inline;
+  display: inline-block;
   margin: 0;
 }
 dl.inline-dl dd:after{

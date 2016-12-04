@@ -2,9 +2,10 @@ from app import app
 from flask import render_template, flash, redirect, session, url_for, request, g, jsonify, abort
 from flask_login import login_required, login_user, logout_user, current_user
 from sys import stderr
+from copy import copy
 from app.forms import RegistrationForm, LoginForm, CreateBookForm, EditBookForm, CreateChapterForm, EditChapterForm, CommentForm
 from app.user import User
-from app.db import register_user, get_all_users, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book, add_chapter_comment, get_comments_by_chapter
+from app.db import register_user, get_all_users, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book, add_chapter_comment, get_comments_by_chapter, get_comments_plus_table
 
 
 
@@ -14,7 +15,18 @@ from app.db import register_user, get_all_users, get_account, get_genres, add_bo
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    # get top 3 books
+    top_books = get_browse_data('book', 'popular', 'decreasing')
+    top_books["rows"] = top_books["rows"][0:3]
+    print(top_books["rows"][0])
+    # get recent 3 chapters
+    latest_chapters = get_browse_data('chapter', 'new', 'increasing')
+    latest_chapters["rows"] = latest_chapters["rows"][0:3]
+    # latest 3 comments
+    comments = get_comments_plus_table()
+    comments["rows"] = comments["rows"][0:3]
+    #
+    return render_template('index.html', **top_books, books=top_books["rows"])
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -167,12 +179,6 @@ def delete_chapter(book_id, chapter_id):
 # Comment Routes
 ####################################
 
-def init_edit_comment_form(form, comment):
-    form = CommentForm(form)
-    if form.content.data == None:
-        form.content.data = comment['content']
-    return form
-
 @app.route('/book/<int:book_id>/comment/create', methods=['GET', 'POST'])
 @login_required
 def create_book_comment(book_id):
@@ -184,12 +190,30 @@ def create_book_comment(book_id):
         return redirect(url_for('view_book', book_id=book_id))
     return render_template('comment/create.html', form=form, book=book)
 
+@app.route('/book/<int:book_id>/comment/create', methods=['GET', 'POST'])
+@login_required
+def edit_book_comment(book_id):
+    book = get_book_plus(book_id)
+    form = CommentForm(request.form)
+    if request.method == 'POST' and form.validate():
+        comment_id = add_book_comment(book_id, form.comment.data, current_user.user_id)
+        # flash('Chapter Created')
+        return redirect(url_for('view_book', book_id=book_id))
+    return render_template('comment/create.html', form=form, book=book)
+
+def init_edit_comment_form(form, comment):
+    form = CommentForm(form)
+    if form.content.data == None:
+        form.content.data = comment['content']
+    return form
+
 @app.route('/book/<int:book_id>/chapter/<int:chapter_id>/comment/create', methods=['GET', 'POST'])
 @login_required
 def create_chapter_comment(book_id, chapter_id):
     book = get_book_plus(book_id)
     chapter = get_chapter(book_id, chapter_id)
-    form = CommentForm(request.form)
+    # comment = #########HERHEHREHRHEHRH
+    form = init_edit_comment_form(request.form, comment)
     if request.method == 'POST' and form.validate():
         comment_id = add_chapter_comment(chapter_id, form.comment.data, current_user.user_id)
         # flash('Chapter Created')

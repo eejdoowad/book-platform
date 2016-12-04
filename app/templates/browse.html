@@ -1,5 +1,104 @@
 {% extends "base.html" %}
 
+{% macro make_books_table(books) -%}
+<table class="u-full-width">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Author</th>
+      <th>genres</th>
+      <th>chapters</th>
+      <th>Views</th>
+      <th>Rating</th>
+      <th>Votes</th>
+      <th>Popularity</th>
+      <th>Created</th>
+    </tr>
+  </thead>
+  <tbody>
+      {% for book in books %}
+        <tr>
+          <td><a href="{{ url_for('view_book', book_id=book.book_id) }}">{{ book.title }}</a></td>
+          <td><a href="{{ url_for('view_user', username=book.author) }}">{{ book.author }}</a></td>
+          <td>{{ book.genres }}</td>
+          <td>{{ book.chapters }}</td>
+          <td>{{ book.views }}</td>
+          <td>{{ book.rating }}</td>
+          <td>{{ book.votes }}</td>
+          <td>{{ book.popularity }}</td>
+          <td>{{ book.create_time }}</td>
+        </tr>
+      {% else %}
+        <tr>
+          <td>empty table</td>
+        </tr>
+      {% endfor %}
+  </tbody>
+</table>
+{%- endmacro %}
+
+{% macro make_chapters_table(chapters) -%}
+<table class="u-full-width">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Book</th>
+      <th>Chapter</th>
+      <th>Views</th>
+      <th>Created</th>
+    </tr>
+  </thead>
+  <tbody>
+      {% for chapter in chapters %}
+        <tr>
+          <td><a href="{{ url_for('view_chapter', book_id=chapter.book_id, chapter_id=chapter.chapter_id) }}">{{ chapter.title }}</a></td>
+          <td><a href="{{ url_for('view_book', book_id=chapter.book_id) }}">{{ chapter.book }}</a></td>
+          <td>{{ chapter.chapter }}</td>
+          <td>{{ chapter.view_count }}</td>
+          <td>{{ chapter.create_time }}</td>
+        </tr>
+      {% else %}
+        <tr>
+          <td>empty table</td>
+        </tr>
+      {% endfor %}
+  </tbody>
+</table>
+{%- endmacro %}
+
+{% macro make_authors_table(authors) -%}
+<table class="u-full-width">
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Joined</th>
+      <th>Website</th>
+      <th>Followers</th>
+      <th>Books</th>
+    </tr>
+  </thead>
+  <tbody>
+      {% for author in authors %}
+        <tr>
+          <td><a href="{{ url_for('view_user', username=author.username) }}">{{ author.username }}</a></td>
+          <td>{{ author.first_name }}</td>
+          <td>{{ author.last_name }}</td>
+          <td>{{ author.joined }}</td>
+          <td>{{ author.website }}</td>
+          <td>{{ author.followers }}</td>
+          <td>{{ author.books }}</td>
+        </tr>
+      {% else %}
+        <tr>
+          <td>empty table</td>
+        </tr>
+      {% endfor %}
+  </tbody>
+</table>
+{%- endmacro %}
+
 {% block title %}Browse{% endblock %}
 
 {% block content %}
@@ -20,6 +119,12 @@
       <a class="button {{'button-primary' if order == 'increasing' else ''}}" href="{{ url_for('browse', entity=entity, sort=sort, order='increasing')}}">Increasing</a>
     </div>
     <div class="row">
-      {% include '_db_table.html' %}
+      {% if entity == 'book' %}
+        {{ make_books_table(rows) }}
+      {% elif entity == 'chapter' %}
+        {{ make_chapters_table(rows)}}
+      {% else %}
+        {{ make_authors_table(rows)}}
+      {% endif %}
     </div>
 {% endblock %}

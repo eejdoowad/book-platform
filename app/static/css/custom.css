@@ -125,6 +125,7 @@ dl.inline-dl dd {
 dl.inline-dl dd:after{
   display: block;
   content: '';
+  
 }
 dl.inline-dl dt{
   display: inline-block;

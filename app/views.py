@@ -35,10 +35,8 @@ def profile():
     return render_template('profile.html', account=account)
 
 @app.route('/user/<username>', methods=['GET', 'POST'])
-@login_required
 def view_user(username):
     account = get_account(username=username)
-    print(account)
     if account == None:
         abort(404)
     return render_template('profile.html', account=account)

@@ -101,7 +101,7 @@ def gen_browse_query(entity, sort, order):
                     FROM book b
                     LEFT JOIN chapter_views cv ON b.book_id = cv.book_id
                     GROUP BY b.book_id)
-            SELECT b.title, a.username AS author, g.genres, c.chapter_count AS chapters, v.book_views AS views, r.rating, r.votes, %s, b.create_time::date
+            SELECT b.book_id, b.title, a.username AS author, g.genres, c.chapter_count AS chapters, v.book_views AS views, r.rating, r.votes, %s, b.create_time::date
             FROM book b
             LEFT JOIN account a ON b.author_id = a.user_id
             LEFT JOIN genres g ON b.book_id = g.book_id
@@ -112,7 +112,7 @@ def gen_browse_query(entity, sort, order):
     elif entity == 'chapter':
         sort = 'c.create_time' if sort == 'new' else 'c.view_count'
         query = cur.mogrify('''
-            SELECT c.title, b.title AS book,
+            SELECT c.book_id, c.chapter_id, c.title, b.title AS book,
                 row_number() over(PARTITION BY c.book_id ORDER BY chapter_id) AS chapter,
                 c.view_count, c.create_time
             FROM chapter c
@@ -362,13 +362,14 @@ def get_comments_by_chapter(chapter_id):
 def get_comments_plus():
     cur.execute('''
     SELECT c.create_time, c.content, a.username, 
-	    CASE WHEN bc.book_id IS NULL THEN FALSE ELSE TRUE END is_book_comment, COALESCE(b.title, chapter.title) AS title, COALESCE(bc.book_id, cc.chapter_id) AS fk_id
+	    CASE WHEN bc.book_id IS NULL THEN FALSE ELSE TRUE END is_book_comment, COALESCE(b.title, chapter.title) AS title, COALESCE(bc.book_id, cc.chapter_id) AS fk_id, c2.book_id
     FROM comment c
     LEFT JOIN account a ON c.user_id = a.user_id
     LEFT JOIN chapter_comment cc ON c.comment_id = cc.comment_id
     LEFT JOIN book_comment bc ON c.comment_id = bc.comment_id
     LEFT JOIN book b ON bc.book_id = b.book_id
     LEFT JOIN chapter ON cc.chapter_id = chapter.chapter_id
+    LEFT JOIN chapter c2 ON c2.chapter_id = chapter.chapter_id
     ORDER BY c.create_time DESC;''')
     return cur.fetchall()
 

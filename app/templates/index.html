@@ -5,9 +5,9 @@
     <div class="item-container">
       <dl class="inline-dl">
         <dt>Title</dt>
-        <dd>{{ book.title }}</dd>
+        <dd><a href="{{ url_for('view_book', book_id=book.book_id) }}">{{ book.title }}</a></dd>
         <dt>Author</dt>
-        <dd>{{ book.author }}</dd>
+        <dd><a href="{{ url_for('view_user', username=book.author) }}">{{ book.author }}</a></dd>
         <dt>Genres</dt>
         <dd>{{ book.genres }}</dd>
         <dt>Chapters</dt>
@@ -32,14 +32,14 @@
     <div class="item-container">
       <dl class="inline-dl">
         <dt>Title</dt>
-        <dd>{{ chapter.title }}</dd>
+        <dd><a href="{{ url_for('view_chapter', book_id=chapter.book_id, chapter_id=chapter.chapter_id) }}">{{ chapter.title }}</a></dd>
         <dt>Book</dt>
-        <dd>{{ chapter.book }}</dd>
-        <dt>Title</dt>
+        <dd><a href="{{ url_for('view_book', book_id=chapter.book_id) }}">{{ chapter.book }}</a></dd>
+        <dt>Chapter</dt>
         <dd>{{ chapter.chapter }}</dd>
-        <dt>Title</dt>
+        <dt>Views</dt>
         <dd>{{ chapter.view_count }}</dd>
-        <dt>Title</dt>
+        <dt>Created</dt>
         <dd>{{ chapter.create_time }}</dd>
       </dl>
     </div>
@@ -50,15 +50,17 @@
   <div class="four columns">
     <div class="item-container">
       <dl class="inline-dl">
-        <a href="">{{ comment.username }}</a> commented on
+        <a href="{{ url_for('view_user', username=comment.username) }}">{{ comment.username }}</a> commented on
         {% if comment.is_book_comment%}
           book
+          <a href="{{ url_for('view_book', book_id=comment.fk_id) }}">{{ comment.title }}</a>
         {% else %}
           chapter
+          <a href="{{ url_for('view_chapter', book_id=comment.book_id, chapter_id=comment.fk_id) }}">{{ comment.title }}</a>
         {% endif %}
-        <a href="">{{ comment.title }}</a> on {{ comment.create_time }}:
+         on {{ comment.create_time }}:
         <br><br>
-        <p>{{ comment.content[:100]}}</p>
+        <p>{{ comment.content[:300]}}</p>
       </dl>
     </div>
   </div>

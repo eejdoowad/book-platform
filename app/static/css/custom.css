@@ -37,7 +37,7 @@
 
 .item-container {
   position: relative;
-  margin-top: 30px;
+  margin-top: 10px;
   min-height: 280px;
   border-color: #33C3F0;
   border-width: 1px;
@@ -45,6 +45,9 @@
   border-radius: 5px;
   overflow-x: scroll;
   padding: 10px;
+}
+.vs {
+  margin-top: 30px;
 }
 
 .button-error {

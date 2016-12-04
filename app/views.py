@@ -26,7 +26,7 @@ def index():
     comments = get_comments_plus_table()
     comments["rows"] = comments["rows"][0:3]
     #
-    return render_template('index.html', **top_books, books=top_books["rows"])
+    return render_template('index.html', books=top_books["rows"], chapters=latest_chapters["rows"], comments=comments["rows"])
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required

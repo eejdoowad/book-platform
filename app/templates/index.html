@@ -27,35 +27,68 @@
   </div>
 {%- endmacro %}
 
+{% macro make_chapter_item(chapter) -%}
+  <div class="four columns">
+    <div class="item-container">
+      <dl class="inline-dl">
+        <dt>Title</dt>
+        <dd>{{ chapter.title }}</dd>
+        <dt>Book</dt>
+        <dd>{{ chapter.book }}</dd>
+        <dt>Title</dt>
+        <dd>{{ chapter.chapter }}</dd>
+        <dt>Title</dt>
+        <dd>{{ chapter.view_count }}</dd>
+        <dt>Title</dt>
+        <dd>{{ chapter.create_time }}</dd>
+      </dl>
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro make_comment_item(comment) -%}
+  <div class="four columns">
+    <div class="item-container">
+      <dl class="inline-dl">
+        <a href="">{{ comment.username }}</a> commented on
+        {% if comment.is_book_comment%}
+          book
+        {% else %}
+          chapter
+        {% endif %}
+        <a href="">{{ comment.title }}</a> on {{ comment.create_time }}:
+        <br><br>
+        <p>{{ comment.content[:100]}}</p>
+      </dl>
+    </div>
+  </div>
+{%- endmacro %}
+
 {% block title %}Novel Cat{% endblock %}
 
 {% block content %}
-<div class="row">
-  {{ make_book_item(books[0]) }}
-  {{ make_book_item(books[1]) }}
-  {{ make_book_item(books[2]) }}
+<div class="row vs">
+  <h2>Popular Books</h2>
 </div>
 <div class="row">
   {{ make_book_item(books[0]) }}
   {{ make_book_item(books[1]) }}
   {{ make_book_item(books[2]) }}
 </div>
-<div class="row">
-  <div class="four columns">
-    <div class="item-container">
-      a
-    </div>
-  </div>
-  <div class="four columns">
-    <div class="item-container">
-      b
-    </div>
-  </div>
-  <div class="four columns">
-    <div class="item-container">
-      c
-    </div>
-  </div>
+<div class="row vs">
+  <h2>Latest Chapters</h2>
 </div>
-{% include '_db_table.html' %}
+<div class="row">
+  {{ make_chapter_item(chapters[0]) }}
+  {{ make_chapter_item(chapters[1]) }}
+  {{ make_chapter_item(chapters[2]) }}
+</div>
+<div class="row vs">
+  <h2>Latest Comments</h2>
+</div>
+<div class="row">
+  {{ make_comment_item(comments[0]) }}
+  {{ make_comment_item(comments[1]) }}
+  {{ make_comment_item(comments[2]) }}
+</div>
 {% endblock %}

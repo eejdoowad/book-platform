@@ -1,0 +1,60 @@
+{% extends "admin/index.html" %}
+
+
+{% macro easy_table(data) -%}
+  <table class="u-full-width">
+    <thead>
+      <tr>
+        {% for column in data.columns %}
+        <th>{{ column }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+        {% for row in data.rows %}
+          <tr>
+          {% for e in row %}
+            <td>{{ e }}</td>
+          {% endfor %}
+          </tr>
+        {% else %}
+          <tr>
+            <td>empty table</td>
+          </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+{%- endmacro %}
+
+
+{% block content %}
+<div class="row">
+      <div class="row">
+      Time
+      <a class="button {{'button-primary' if when == 'hour' else ''}}" href="{{ url_for('admin_report', when='hour')}}">Last Hour</a>
+      <a class="button {{'button-primary' if when == 'day' else ''}}" href="{{ url_for('admin_report', when='day')}}">Last Day</a>
+      <a class="button {{'button-primary' if when == 'week' else ''}}" href="{{ url_for('admin_report', when='week')}}">Last Week</a>
+      <a class="button {{'button-primary' if when == 'month' else ''}}" href="{{ url_for('admin_report', when='month')}}">Last Month</a>
+    </div>
+</div>
+<div class="row">
+  <h2>New Users</h2>
+  {{ easy_table(new_users) }}
+</div>
+<div class="row">
+  <h2>New Books</h2>
+  {{ easy_table(new_books) }}
+</div>
+<div class="row">
+  <h2>Most Followers</h2>
+  {{ easy_table(most_followers) }}
+</div>
+<div class="row">
+  <h2>Most Viewed Books (by total chapter reads)</h2>
+  {{ easy_table(popular_books) }}
+</div>
+<div class="row">
+  <h2>Most Commented Chapter</h2>
+  {{ easy_table(most_commented_chapters) }}
+</div>
+{% endblock %}

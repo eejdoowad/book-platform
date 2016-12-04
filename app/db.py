@@ -36,15 +36,6 @@ def register_user(form):
     except Exception as e:
         print(e, file=stderr)
 
-def get_all_users():
-    try:
-      cur.execute("SELECT * FROM account")
-      users = cur.fetchall()
-      return users
-    except Exception as e:
-        print(e, file=stderr)
-        return []
-
 def get_user(username):
     cur.execute("SELECT * FROM account WHERE username = %s", (username,))
     return cur.fetchone()
@@ -170,7 +161,7 @@ def get_book(book_id):
 
 def get_book_plus(book_id):
     cur.execute('''
-        SELECT b.book_id, b.title, a.username, b.summary, array_agg(bg.genre) AS genres, b.create_time::date
+        SELECT b.book_id, b.title, a.username, b.author_id, b.summary, array_agg(bg.genre) AS genres, b.create_time::date
         FROM book b
         LEFT JOIN account a ON b.author_id = a.user_id
         LEFT JOIN book_genre bg ON b.book_id = bg.book_id
@@ -386,7 +377,6 @@ def get_comments_plus_table():
 # Admin Table View Queries
 ####################################
 
-@functools.lru_cache(1)
 def get_tables():
     '''returns the names of all database tables as a list'''
     cur.execute('''
@@ -420,6 +410,84 @@ def get_table_data(table):
         "columns": get_table_columns(table),
         "rows": get_all_rows(table)
     }
+
+
+
+####################################
+# Admin Report Queries
+####################################
+
+def get_interval(when):
+    if when == 'hour':
+        return '1 hours'
+    elif when == 'day':
+        return '24 hours'
+    elif when == 'week':
+        return '1 weeks'
+    elif when == 'month':
+        return '1 months'
+    else:
+        raise Exception('unaccepted time interval')
+
+def wrap_report(rows):
+    columns = [desc[0] for desc in cur.description]
+    return {
+        "columns": columns,
+        "rows": rows
+    }  
+
+def report_new_users(when):
+    cur.execute('''
+        SELECT *
+        FROM account
+        WHERE create_time >  NOW() AT TIME ZONE 'utc' - INTERVAL %s
+        ORDER BY create_time DESC;''', (get_interval(when),))
+    return wrap_report(cur.fetchall())
+
+def report_new_books(when):
+    cur.execute('''
+        SELECT *
+        FROM book
+        WHERE create_time >  NOW() AT TIME ZONE 'utc' - INTERVAL %s
+        ORDER BY create_time DESC;''', (get_interval(when),))
+    return wrap_report(cur.fetchall())
+
+def report_most_followers(when):
+    cur.execute('''
+        SELECT a.user_id, a.username, COUNT(f.follower_id) AS new_followers
+        FROM account a
+        LEFT JOIN follow f ON a.user_id = f.followee_id
+        WHERE f.follow_time >  NOW() AT TIME ZONE 'utc' - INTERVAL %s
+        GROUP BY a.user_id
+        ORDER BY new_followers DESC;''', (get_interval(when),))
+    return wrap_report(cur.fetchall())
+
+def report_most_popular_books(when):
+    cur.execute('''
+        WITH chapter_views as (
+            SELECT c.book_id, c.chapter_id, COUNT(v.user_id) AS chapter_views
+            FROM chapter c
+            LEFT JOIN chapter_view v ON c.chapter_id = v.chapter_id
+            WHERE v.view_time >  NOW() AT TIME ZONE 'utc' - INTERVAL %s
+            GROUP BY c.chapter_id)
+        SELECT b.book_id, b.title, COALESCE(SUM(cv.chapter_views), 0) AS book_views
+        FROM book b
+        LEFT JOIN chapter_views cv ON b.book_id = cv.book_id
+        GROUP BY b.book_id
+        HAVING COALESCE(SUM(cv.chapter_views), 0) > 0;''', (get_interval(when),))
+    return wrap_report(cur.fetchall())
+
+def report_most_commented_chapters(when):
+    cur.execute('''
+    SELECT *
+    FROM (
+        SELECT c.chapter_id, COALESCE(array_length(array_agg(cc.chapter_id) FILTER (WHERE cc.chapter_id IS NOT NULL), 1), 0) AS comments
+        FROM chapter c
+        LEFT JOIN chapter_comment cc ON c.chapter_id = cc.chapter_id
+        GROUP BY c.chapter_id) x
+    WHERE x.comments > 0
+    ORDER BY x.comments DESC;''', (get_interval(when),))
+    return wrap_report(cur.fetchall())
 
 
 

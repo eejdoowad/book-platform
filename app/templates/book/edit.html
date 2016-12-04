@@ -14,8 +14,8 @@
       {{ render_field(form.genres, class="select-menu u-full-width") }}
       <input type="submit" value="Submit" class="button-primary u-full-width">
     </form>
-    <a class="button u-full-width" href="{{ url_for('view_book', book_id=book_id)}}">Cancel Edit</a>
-    <a class="button button-error u-full-width" href="{{ url_for('delete_chapter', book_id=book_id, chapter_id=chapter_id)}}">Delete Book</a>
+    <a class="button u-full-width" href="{{ url_for('view_book', book_id=book_id) }}">Cancel Edit</a>
+    <a class="button button-error u-full-width" href="{{ url_for('delete_book', book_id=book_id) }}">Delete Book</a>
   </div>
 </div>
 {% endblock %}

@@ -5,7 +5,7 @@ from sys import stderr
 from copy import copy
 from app.forms import RegistrationForm, LoginForm, CreateBookForm, EditBookForm, CreateChapterForm, EditChapterForm, CommentForm
 from app.user import User
-from app.db import register_user, get_all_users, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book, add_chapter_comment, get_comments_by_chapter, get_comments_plus_table
+from app.db import register_user, get_account, get_genres, add_book_with_genres, get_table_data, get_tables, get_books_by_author, get_books_with_genre_by_author, get_book, get_book_plus, edit_book_with_genres, add_chapter, get_chapters_by_book, get_chapter, edit_book_chapter, remove_book, remove_book_chapter, get_browse_data, add_book_comment, get_comments_by_book, add_chapter_comment, get_comments_by_chapter, get_comments_plus_table, report_new_users, report_new_books, report_most_followers, report_most_popular_books, report_most_commented_chapters
 
 
 
@@ -244,6 +244,15 @@ def table_page(table):
 
     return render_template('admin/table/table.html', tables=get_tables(), **get_table_data(table))
 
+@app.route('/admin/report', methods=['GET'])
+@app.route('/admin/report/<when>', methods=['GET'])
+def admin_report(when='day'):
+    new_users = report_new_users(when)
+    new_books = report_new_books(when)
+    most_followers = report_most_followers(when)
+    popular_books = report_most_popular_books(when)
+    most_commented_chapters = report_most_commented_chapters(when)
+    return render_template('admin/report.html', when=when, new_users=new_users, new_books=new_books, most_followers=most_followers, popular_books=popular_books, most_commented_chapters=most_commented_chapters)
 
 
 ####################################

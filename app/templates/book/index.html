@@ -4,9 +4,11 @@
 
 {% block content %}
 <div class="row">
-  <div class="five columns">
+  <div class="four columns">
     <div>
-      <a class="button button-primary u-pull-right" href="{{ url_for('edit_book', book_id=book.book_id)}}">Edit Book</a>
+      {% if current_user.user_id == book.author_id %}
+        <a class="button button-primary u-pull-right" href="{{ url_for('edit_book', book_id=book.book_id)}}">Edit Book</a>
+      {% endif %}
       <h1>{{ book.title }}</h1>
       <dl class="inline-dl">
         <dt>Author</dt>
@@ -29,8 +31,10 @@
       </div>
     </div>
   </div>
-  <div class="seven columns">
-      <a class="button button-primary u-pull-right" href="{{ url_for('create_chapter', book_id=book.book_id)}}">New Chapter</a>
+  <div class="eight columns">
+      {% if current_user.user_id == book.author_id %}
+        <a class="button button-primary u-pull-right" href="{{ url_for('create_chapter', book_id=book.book_id)}}">New Chapter</a>
+      {% endif %}
       <h2>Chapters</h2>
       {% include 'book/_chapter_table.html' %}
   </div>
